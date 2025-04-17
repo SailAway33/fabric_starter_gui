@@ -16,18 +16,16 @@ def run_command(command):
         return str(e)
 
 def start_command(button, port_label, command, cwd=None):
-
     def run_in_thread():
         print(f"[DEBUG] Start button clicked. Command: {command}, CWD: {cwd}")
-        # Disable the button to prevent multiple clicks 
         button.config(state=tk.DISABLED)
         try:
-            #open the command in a new terminal
+            # Open the command in a new terminal with the specified working directory
             subprocess.Popen(
                 ['gnome-terminal', '--', 'bash', '-c', f"{command}; exec bash"],
                 stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE
-                cwd=cwd #set the working directory
+                stderr=subprocess.PIPE,
+                cwd=cwd  # Set the working directory
             )
             status = "Running in new terminal"
         except Exception as e:
@@ -36,9 +34,9 @@ def start_command(button, port_label, command, cwd=None):
         button.config(state=tk.NORMAL)
         port_label.config(text=f"Status: {status}")
         
-    # Run the command in a sepreate thread
+    # Run the command in a separate thread
     thread = threading.Thread(target=run_in_thread)
-    thread.daemon = True #ensure the thread exits when the main ends
+    thread.daemon = True  # Ensure the thread exits when the main ends
     thread.start()
 
 def open_browser(port_label):
@@ -94,17 +92,17 @@ for frame, command, port in zip(frames, commands, ports):
     port_labels.append(port_label)
     port_label.pack(pady=5)
     
-    # Determine the working directory for a specific command
+    # Determine the working directory for specific commands
     cwd = None
     if "streamlit run streamlit.py" in command:
-        cwd = "/home/andy/go/pkg/mod/github.com/danielmiessler/fabric@v1.4.168/"
+        cwd = "/home/andy/go/pkg/mod/github.com/danielmiessler/fabric@v1.4.168"
     
     button_start = ttk.Button(
         frame,
         text="Start",
-        command=lambda cmd=command: (
-            print(f"[DEBUG] Start button initialized for command: {cmd}"),
-            start_command(button_start, port_label, cmd)
+        command=lambda cmd=command, cwd=cwd: (
+            print(f"[DEBUG] Start button initialized for command: {cmd}, CWD: {cwd}"),
+            start_command(button_start, port_label, cmd, cwd)
         )
     )
     buttons_start.append(button_start)
